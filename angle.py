@@ -114,7 +114,7 @@ while True:
 
         print("Angle X: " + str(kalAngleX)+"   " +"Angle Y: " + str(kalAngleY))
         #print(str(roll)+"  "+str(gyroXAngle)+"  "+str(compAngleX)+"  "+str(kalAngleX)+"  "+str(pitch)+"  "+str(gyroYAngle)+"  "+str(compAngleY)+"  "+str(kalAngleY))
-        time.sleep(0.5)
+        time.sleep(0.2)
 
     except Exception as exc:
         flag += 1
