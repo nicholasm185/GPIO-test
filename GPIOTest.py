@@ -2,7 +2,7 @@ from gpiozero import LED
 from gpiozero import PWMLED
 from time import sleep
 
-led1 = PWMLED(16)
+led1 = PWMLED(18)
 
 """
 while True:
