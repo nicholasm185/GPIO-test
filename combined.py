@@ -6,17 +6,20 @@ from mpu6050 import mpu6050
 import time
 from Kalman import KalmanAngle
 import math
-from magnet import getMagnetStrength
+#from magnet import getMagnetStrength
 import RPi.GPIO as GPIO
 
 sensor = mpu6050(0x68)
 
+TRESHOLD = 4000
+mode = 0
+
 def startRecord(channel):
     f = open('result.csv', 'w')
+    rot = 0
     
     kalmanX = KalmanAngle()
     kalmanY = KalmanAngle()
-    RestrictPitch = True
     radToDeg = 57.2957786
     kalAngleX = 0
     kalAngleY = 0
@@ -27,12 +30,10 @@ def startRecord(channel):
     accX = accdata["x"]
     accY = accdata["y"]
     accZ = accdata["z"]
-    if (RestrictPitch):
-        roll = math.atan2(accY,accZ) * radToDeg
-        pitch = math.atan(-accX/math.sqrt((accY**2)+(accZ**2))) * radToDeg
-    else:
-        roll = math.atan(accY/math.sqrt((accX**2)+(accZ**2))) * radToDeg
-        pitch = math.atan2(-accX,accZ) * radToDeg
+    
+    roll = math.atan2(accY,accZ) * radToDeg
+    pitch = math.atan(-accX/math.sqrt((accY**2)+(accZ**2))) * radToDeg
+    
     print(roll)
     kalmanX.setAngle(roll)
     kalmanY.setAngle(pitch)
@@ -59,41 +60,40 @@ def startRecord(channel):
 
         dt = time.time() - timer
         timer = time.time()
-
-        if (RestrictPitch):
-            roll = math.atan2(accY,accZ) * radToDeg
-            pitch = math.atan(-accX/math.sqrt((accY**2)+(accZ**2))) * radToDeg
-        else:
-            roll = math.atan(accY/math.sqrt((accX**2)+(accZ**2))) * radToDeg
-            pitch = math.atan2(-accX,accZ) * radToDeg
+        
+        roll = math.atan2(accY,accZ) * radToDeg
+        pitch = math.atan(-accX/math.sqrt((accY**2)+(accZ**2))) * radToDeg
 
         gyroXRate = gyroX/131
         gyroYRate = gyroY/131
-
-        if (RestrictPitch):
-
-            if((roll < -90 and kalAngleX >90) or (roll > 90 and kalAngleX < -90)):
+                
+        if((roll < -90 and kalAngleX >90) or (roll > 90 and kalAngleX < -90)):
                 kalmanX.setAngle(roll)
                 complAngleX = roll
                 kalAngleX   = roll
                 gyroXAngle  = roll
-            else:
-                kalAngleX = kalmanX.getAngle(roll,gyroXRate,dt)
-
-            if(abs(kalAngleX)>90):
-                gyroYRate  = -gyroYRate
         else:
-            if(abs(kalAngleY)>90):
-                gyroXRate  = -gyroXRate
-                kalAngleX = kalmanX.getAngle(roll,gyroXRate,dt)
+            kalAngleX = kalmanX.getAngle(roll,gyroXRate,dt)
 
         gyroXAngle = gyroXRate * dt
         compAngleX = 0.93 * (compAngleX + gyroXRate * dt) + 0.07 * roll
 
         if ((gyroXAngle < -180) or (gyroXAngle > 180)):
             gyroXAngle = kalAngleX
+        '''
         #datalist.append((kalAngleX,getMagnetStrength()))
-        f.write(str(kalAngleX)+','+str(getMagnetStrength())+'\n')
+        if(mode == 0):
+            if(getMagnetStrength()> TRESHOLD):
+                rot +=1
+                mode = 1
+        elif:
+            if(getMagnetStrength()< TRESHOLD):
+                mode = 0
+        '''
+                
+        #.write(str(kalAngleX)+','+str(rot)+'\n')
+        f.write(str(kalAngleX)+'\n')
+        #print(kalAngleX)
         i += 1
     print('done recording')
     f.close()
