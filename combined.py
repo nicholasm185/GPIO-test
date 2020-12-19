@@ -5,13 +5,17 @@ import math
 from magnet import getMagnetStrength
 import RPi.GPIO as GPIO
 from threading import Thread
+import requests
+
+SERVER_URL = 'http://10.12.0.158:8080/sendResult'
 
 class ReCycle:
-    def __init__(self):
+    def __init__(self, serverURL):
         self.sensor = mpu6050(0x68)
         self.TRESHOLD = 4000
         self.mode = 0
         self.on = False
+        self.serverURL = serverURL
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
@@ -93,9 +97,9 @@ class ReCycle:
                     mode = 0
             '''
                     
-            #write(str(kalAngleX)+','+str(rot)+'\n')
+            f.write(str(kalAngleX)+','+str(getMagnetStrength())+'\n')
             #f.write(str(kalAngleX)+'\n')
-            print(kalAngleX, getMagnetStrength())
+            #print(kalAngleX, getMagnetStrength())
         print('done recording')
         f.write(str(timer))
         f.close()
@@ -108,6 +112,10 @@ class ReCycle:
         elif self.on:
             self.on = False
             print('loop stopping: ' + str(self.on))
+            time.sleep(2)
+            print('uploading')
+            with open('result.csv', 'rb') as f:
+                r = requests.post(this.serverURL, files={'data':f})
 
-x = ReCycle()
+x = ReCycle(SERVER_URL)
     
