@@ -115,7 +115,11 @@ class ReCycle:
             time.sleep(2)
             print('uploading')
             with open('result.csv', 'rb') as f:
-                r = requests.post(this.serverURL, files={'data':f})
+                try:
+                    r = requests.post(self.serverURL, files={'data':f})
+                    print('upload finished')
+                except:
+                    print('upload failed')
 
 x = ReCycle(SERVER_URL)
     
