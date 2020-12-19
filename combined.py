@@ -19,6 +19,7 @@ class ReCycle:
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(10,GPIO.OUT)
         GPIO.add_event_detect(12,GPIO.RISING,callback=self.turnOn)
         message = input("Press enter to quit\n\n")
         GPIO.cleanup()
@@ -30,21 +31,17 @@ class ReCycle:
         kalmanX = KalmanAngle()
         radToDeg = 57.2957786
         kalAngleX = 0
-        kalAngleY = 0
 
         time.sleep(1)
         #Read Accelerometer raw value
         accdata = self.sensor.get_accel_data()
-        accX = accdata["x"]
         accY = accdata["y"]
         accZ = accdata["z"]
         
         roll = math.atan2(accY,accZ) * radToDeg
-        #pitch = math.atan(-accX/math.sqrt((accY**2)+(accZ**2))) * radToDeg
 
         kalmanX.setAngle(roll)
         gyroXAngle = roll
-        #gyroYAngle = pitch
         compAngleX = roll
 
         timer = time.time()
@@ -61,16 +58,13 @@ class ReCycle:
             gyrdata = self.sensor.get_gyro_data()
             gyroX = gyrdata["x"]
             gyroY = gyrdata["y"]
-            gyroZ = gyrdata["z"]
 
             dt = time.time() - timer
             timer = time.time()
             
             roll = math.atan2(accY,accZ) * radToDeg
-            #pitch = math.atan(-accX/math.sqrt((accY**2)+(accZ**2))) * radToDeg
 
             gyroXRate = gyroX/131
-            gyroYRate = gyroY/131
                     
             if((roll < -90 and kalAngleX >90) or (roll > 90 and kalAngleX < -90)):
                     kalmanX.setAngle(roll)
@@ -109,6 +103,7 @@ class ReCycle:
             self.on = True
             print('Starting loop: ' + str(self.on))
             Thread(target = self.RecordLoop).start()
+            GPIO.output(10,GPIO.HIGH)
         elif self.on:
             self.on = False
             print('loop stopping: ' + str(self.on))
@@ -120,6 +115,7 @@ class ReCycle:
                     print('upload finished')
                 except:
                     print('upload failed')
+            GPIO.output(10,GPIO.LOW)
 
 x = ReCycle(SERVER_URL)
     
