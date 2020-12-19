@@ -2,7 +2,7 @@ from mpu6050 import mpu6050
 import time
 from Kalman import KalmanAngle
 import math
-#from magnet import getMagnetStrength
+from magnet import getMagnetStrength
 import RPi.GPIO as GPIO
 from threading import Thread
 
@@ -81,6 +81,7 @@ class ReCycle:
 
             if ((gyroXAngle < -180) or (gyroXAngle > 180)):
                 gyroXAngle = kalAngleX
+
             '''
             #datalist.append((kalAngleX,getMagnetStrength()))
             if(mode == 0):
@@ -92,9 +93,9 @@ class ReCycle:
                     mode = 0
             '''
                     
-            #.write(str(kalAngleX)+','+str(rot)+'\n')
-            f.write(str(kalAngleX)+'\n')
-            #print(kalAngleX)
+            #write(str(kalAngleX)+','+str(rot)+'\n')
+            #f.write(str(kalAngleX)+'\n')
+            print(kalAngleX, getMagnetStrength())
         print('done recording')
         f.write(str(timer))
         f.close()
