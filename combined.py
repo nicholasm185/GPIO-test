@@ -12,7 +12,7 @@ SERVER_URL = 'http://10.12.0.158:8080/sendResult'
 class ReCycle:
     def __init__(self, serverURL):
         self.sensor = mpu6050(0x68)
-        self.TRESHOLD = 4000
+        self.TRESHOLD = 100
         self.mode = 0
         self.on = False
         self.serverURL = serverURL
@@ -27,6 +27,7 @@ class ReCycle:
     def RecordLoop(self):
         f = open('result.csv', 'w')
         rot = 0
+        mode = 0
         
         kalmanX = KalmanAngle()
         radToDeg = 57.2957786
@@ -80,18 +81,16 @@ class ReCycle:
             if ((gyroXAngle < -180) or (gyroXAngle > 180)):
                 gyroXAngle = kalAngleX
 
-            '''
-            #datalist.append((kalAngleX,getMagnetStrength()))
+            mag = getMagnetStrength()
             if(mode == 0):
-                if(getMagnetStrength()> self.TRESHOLD):
+                if(mag > self.TRESHOLD):
                     rot +=1
                     mode = 1
-            elif:
-                if(getMagnetStrength()< self.TRESHOLD):
+            else:
+                if(mag < self.TRESHOLD):
                     mode = 0
-            '''
                     
-            f.write(str(kalAngleX)+','+str(getMagnetStrength())+'\n')
+            f.write(str(kalAngleX)+','+str(rot)+'\n')
             #f.write(str(kalAngleX)+'\n')
             #print(kalAngleX, getMagnetStrength())
         print('done recording')
